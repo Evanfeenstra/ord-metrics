@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     let mut page = 0;
     loop {
         let is_more = process_inscriptions_page(page, &mut ret).await?;
-        if !is_more || page > 10 {
+        if !is_more {
             break;
         }
         page += 1;
@@ -159,11 +159,11 @@ async fn process_inscriptions_page(page: u64, ret: &mut BTreeMap<String, Stats>)
         block.inscriptions.len()
     );
 
-    let mut is_more = block.more;
+    let is_more = block.more;
 
     for insc in block.inscriptions {
         let i = get_inscription(&insc).await?;
-        println!("=> HEIGHT: {:?}", i.genesis_height);
+        // println!("=> HEIGHT: {:?}", i.genesis_height);
         let skip = i.genesis_height > SNAPSHOT_HEIGHT;
         if !skip {
             if let Some(addy) = i.address {
