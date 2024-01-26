@@ -53,19 +53,21 @@ async fn process_inscriptions_page(page: u64, ret: &mut BTreeMap<String, Stats>)
     );
     for insc in block.inscriptions {
         let i = get_inscription(&insc).await?;
-        match ret.get_mut(&i.address) {
-            Some(r) => {
-                r.any += 1;
-            }
-            None => {
-                ret.insert(
-                    i.address.clone(),
-                    Stats {
-                        any: 1,
-                        img: 0,
-                        boring: 0,
-                    },
-                );
+        if let Some(addy) = i.address {
+            match ret.get_mut(&addy) {
+                Some(r) => {
+                    r.any += 1;
+                }
+                None => {
+                    ret.insert(
+                        addy.clone(),
+                        Stats {
+                            any: 1,
+                            img: 0,
+                            boring: 0,
+                        },
+                    );
+                }
             }
         }
     }
@@ -74,7 +76,7 @@ async fn process_inscriptions_page(page: u64, ret: &mut BTreeMap<String, Stats>)
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct InscriptionJson {
-    address: String,
+    address: Option<String>,
     content_type: String,
 }
 
