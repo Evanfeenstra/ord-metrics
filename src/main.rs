@@ -19,11 +19,30 @@ async fn main() -> Result<()> {
         get_inscriptions_in_block(bn).await?;
     }
 
+    for page in 0..100 {
+        get_inscriptions_page(page).await?;
+    }
+
+    Ok(())
+}
+
+async fn get_inscriptions_page(page: u64) -> Result<()> {
+    let url = format!("inscriptions/0/{}", page);
+    let resp = get(&url).await?;
+    let block: InscriptionsJson = serde_json::from_str(&resp)?;
+    if block.more {
+        println!("=======> page {} has more inscriptions", page);
+    }
+    println!(
+        "=> page {} has {} inscriptions",
+        page,
+        block.inscriptions.len()
+    );
     Ok(())
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Block {
+pub struct InscriptionsJson {
     inscriptions: Vec<String>,
     more: bool,
     page_index: u64,
@@ -31,7 +50,7 @@ pub struct Block {
 async fn get_inscriptions_in_block(bn: u64) -> Result<()> {
     let url = format!("inscriptions/block/{}", bn);
     let resp = get(&url).await?;
-    let block: Block = serde_json::from_str(&resp)?;
+    let block: InscriptionsJson = serde_json::from_str(&resp)?;
     if block.more {
         println!("=======> block {} has more inscriptions", bn);
     }
