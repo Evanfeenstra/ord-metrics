@@ -163,8 +163,10 @@ async fn process_inscriptions_page(page: u64, ret: &mut BTreeMap<String, Stats>)
 
     for insc in block.inscriptions {
         let i = get_inscription(&insc).await?;
+        println!("=> HEIGHT: {:?}", i.genesis_height);
         if i.genesis_height > SNAPSHOT_HEIGHT {
             is_more = false;
+            println!("GOT TO THE SNAPSHOT HEIGHT");
             break;
         }
         if let Some(addy) = i.address {
