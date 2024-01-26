@@ -27,7 +27,7 @@ async fn main() -> Result<()> {
 }
 
 async fn get_inscriptions_page(page: u64) -> Result<()> {
-    let url = format!("inscriptions/0/{}", page);
+    let url = format!("inscriptions/{}", page);
     let resp = get(&url).await?;
     let block: InscriptionsJson = serde_json::from_str(&resp)?;
     if block.more {
