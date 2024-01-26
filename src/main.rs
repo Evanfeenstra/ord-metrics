@@ -20,5 +20,12 @@ async fn main() -> Result<()> {
 
 async fn get(path: &str) -> Result<String> {
     let url = format!("{}/{}", ROOT, path);
-    Ok(reqwest::get(url).await?.text().await?)
+    let client = reqwest::Client::new();
+    Ok(client
+        .get(url)
+        .header(reqwest::header::ACCEPT, "application/json")
+        .send()
+        .await?
+        .text()
+        .await?)
 }
