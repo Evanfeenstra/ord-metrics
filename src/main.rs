@@ -1,4 +1,4 @@
-const ROOT: &str = "http://0.0.0.0:80";
+const ROOT: &str = "http://0.0.0.0:3000";
 
 type Result<T> = std::result::Result<T, anyhow::Error>;
 
@@ -9,7 +9,8 @@ async fn main() -> Result<()> {
     let resp = get(&url1).await?;
     println!("{}", resp);
 
-    let first_block = 290880;
+    let first_block = 767430;
+    let snapshot_block = 826600;
     let url = format!("inscriptions/block/{}", first_block);
     let resp2 = get(&url).await?;
     println!("{}", resp2);
