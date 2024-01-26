@@ -164,32 +164,30 @@ async fn process_inscriptions_page(page: u64, ret: &mut BTreeMap<String, Stats>)
     for insc in block.inscriptions {
         let i = get_inscription(&insc).await?;
         println!("=> HEIGHT: {:?}", i.genesis_height);
-        if i.genesis_height > SNAPSHOT_HEIGHT {
-            is_more = false;
-            println!("GOT TO THE SNAPSHOT HEIGHT");
-            break;
-        }
-        if let Some(addy) = i.address {
-            if let Some(mime) = i.content_type {
-                match ret.get_mut(&addy) {
-                    Some(r) => {
-                        r.any += 1;
-                        match is_boring(&mime) {
-                            true => r.boring += 1,
-                            false => r.cool += 1,
-                        };
-                    }
-                    None => {
-                        let mut sta = Stats {
-                            any: 1,
-                            cool: 0,
-                            boring: 0,
-                        };
-                        match is_boring(&mime) {
-                            true => sta.boring += 1,
-                            false => sta.cool += 1,
-                        };
-                        ret.insert(addy.clone(), sta);
+        let skip = i.genesis_height > SNAPSHOT_HEIGHT;
+        if !skip {
+            if let Some(addy) = i.address {
+                if let Some(mime) = i.content_type {
+                    match ret.get_mut(&addy) {
+                        Some(r) => {
+                            r.any += 1;
+                            match is_boring(&mime) {
+                                true => r.boring += 1,
+                                false => r.cool += 1,
+                            };
+                        }
+                        None => {
+                            let mut sta = Stats {
+                                any: 1,
+                                cool: 0,
+                                boring: 0,
+                            };
+                            match is_boring(&mime) {
+                                true => sta.boring += 1,
+                                false => sta.cool += 1,
+                            };
+                            ret.insert(addy.clone(), sta);
+                        }
                     }
                 }
             }
