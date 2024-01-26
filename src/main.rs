@@ -54,19 +54,27 @@ async fn process_inscriptions_page(page: u64, ret: &mut BTreeMap<String, Stats>)
     for insc in block.inscriptions {
         let i = get_inscription(&insc).await?;
         if let Some(addy) = i.address {
-            match ret.get_mut(&addy) {
-                Some(r) => {
-                    r.any += 1;
-                }
-                None => {
-                    ret.insert(
-                        addy.clone(),
-                        Stats {
+            if let Some(mime) = i.content_type {
+                match ret.get_mut(&addy) {
+                    Some(r) => {
+                        r.any += 1;
+                        match is_boring(&mime) {
+                            true => r.boring += 1,
+                            false => r.img += 1,
+                        };
+                    }
+                    None => {
+                        let mut sta = Stats {
                             any: 1,
                             img: 0,
                             boring: 0,
-                        },
-                    );
+                        };
+                        match is_boring(&mime) {
+                            true => sta.boring += 1,
+                            false => sta.img += 1,
+                        };
+                        ret.insert(addy.clone(), sta);
+                    }
                 }
             }
         }
@@ -74,10 +82,14 @@ async fn process_inscriptions_page(page: u64, ret: &mut BTreeMap<String, Stats>)
     Ok(block.more)
 }
 
+fn is_boring(mime: &str) -> bool {
+    mime.contains("text/plain") || mime.contains("application/json")
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct InscriptionJson {
     address: Option<String>,
-    content_type: String,
+    content_type: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
