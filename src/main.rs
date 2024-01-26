@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 const ROOT: &str = "http://0.0.0.0:3000";
 
 type Result<T> = std::result::Result<T, anyhow::Error>;
@@ -5,16 +7,39 @@ type Result<T> = std::result::Result<T, anyhow::Error>;
 #[tokio::main]
 async fn main() -> Result<()> {
     let id1 = "6fb976ab49dcec017f1e201e84395983204ae1a7c2abf7ced0a85d692e442799i0";
-    let url1 = format!("inscriptions/{}", id1);
+    let url1 = format!("inscription/{}", id1);
     let resp = get(&url1).await?;
     println!("{}", resp);
 
     let first_block = 767430;
+    let end_block = first_block + 100;
     let snapshot_block = 826600;
-    let url = format!("inscriptions/block/{}", first_block);
-    let resp2 = get(&url).await?;
-    println!("{}", resp2);
 
+    for bn in first_block..end_block {
+        get_inscriptions_in_block(bn).await?;
+    }
+
+    Ok(())
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Block {
+    inscriptions: Vec<String>,
+    more: bool,
+    page_index: u64,
+}
+async fn get_inscriptions_in_block(bn: u64) -> Result<()> {
+    let url = format!("inscriptions/block/{}", bn);
+    let resp = get(&url).await?;
+    let block: Block = serde_json::from_str(&resp)?;
+    if block.more {
+        println!("=======> block {} has more inscriptions", bn);
+    }
+    println!(
+        "=> block {} has {} inscriptions",
+        bn,
+        block.inscriptions.len()
+    );
     Ok(())
 }
 
