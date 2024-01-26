@@ -12,7 +12,11 @@ type Result<T> = std::result::Result<T, anyhow::Error>;
 async fn main() -> Result<()> {
     let mut ret = BTreeMap::<String, Stats>::new();
 
-    let file = File::open("test.txt")?;
+    let args: Vec<String> = std::env::args().collect();
+    let filepath = &args[1];
+    println!("FILEDPATH: {:?}", filepath);
+
+    let file = File::open(filepath)?;
     let reader = BufReader::new(file);
 
     for line in reader.lines() {
